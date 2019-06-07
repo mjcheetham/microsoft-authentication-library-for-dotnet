@@ -13,6 +13,7 @@ namespace Microsoft.Identity.Client.Core
     {
         IApplicationConfiguration Config { get; }
         ICoreLogger DefaultLogger { get; }
+        ITokenCacheEventSink TokenCacheEventSink { get; }
         IHttpManager HttpManager { get; }
         ITelemetryManager TelemetryManager { get; }
         IAadInstanceDiscovery AadInstanceDiscovery { get; }

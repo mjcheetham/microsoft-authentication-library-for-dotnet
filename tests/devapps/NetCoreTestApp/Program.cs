@@ -51,29 +51,13 @@ namespace NetCoreTestApp
 
         private static IPublicClientApplication CreatePca()
         {
-            IPublicClientApplication pca = PublicClientApplicationBuilder
-                            .Create(s_clientIdForPublicApp)
-                            .WithAuthority(GetAuthority())
-                            .WithLogging(Log, LogLevel.Verbose, true)
-                            .WithRedirectUri("http://localhost") // required for DefaultOsBrowser
-                            .Build();
-
-            pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
-            {
-                notificationArgs.TokenCache.DeserializeMsalV3(File.Exists(CacheFilePath)
-                    ? File.ReadAllBytes(CacheFilePath)
-                    : null);
-            });
-            pca.UserTokenCache.SetAfterAccess(notificationArgs =>
-            {
-                // if the access operation resulted in a cache update
-                if (notificationArgs.HasStateChanged)
-                {
-                    // reflect changes in the persistent store
-                    File.WriteAllBytes(CacheFilePath, notificationArgs.TokenCache.SerializeMsalV3());
-                }
-            });
-            return pca;
+            return PublicClientApplicationBuilder
+                    .Create(s_clientIdForPublicApp)
+                    .WithAuthority(GetAuthority())
+                    .WithLogging(Log, LogLevel.Verbose, true)
+                    .WithRedirectUri("http://localhost") // required for DefaultOsBrowser
+                    .WithTokenCache(new FileBasedTokenCache(CacheFilePath))
+                    .Build();
         }
 
         private static async Task RunConsoleAppLogicAsync(IPublicClientApplication pca)
@@ -91,7 +75,7 @@ namespace NetCoreTestApp
                         2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
                         4. Acquire Token Interactive (via CustomWebUI)
-                        5. Acquire Token Interactive 
+                        5. Acquire Token Interactive
                         6. Acquire Token Silently
                         7. Acquire Interactive (logic in netstandard, default authority)
                         8. Clear cache
@@ -319,7 +303,39 @@ namespace NetCoreTestApp
                 return ex.ToString();
             }
         }
+    }
 
+    internal class FileBasedTokenCache : ITokenCacheEventSink
+    {
+        private readonly string _cacheFilePath;
 
+        public FileBasedTokenCache(string cacheFilePath)
+        {
+            _cacheFilePath = cacheFilePath;
+        }
+
+        public Task OnAfterAccessAsync(TokenCacheNotificationArgs args)
+        {
+            // if the access operation resulted in a cache update
+            if (args.HasStateChanged)
+            {
+                // reflect changes in the persistent store
+                File.WriteAllBytes(_cacheFilePath, args.TokenCache.SerializeMsalV3());
+            }
+        }
+
+        public Task OnBeforeAccessAsync(TokenCacheNotificationArgs args)
+        {
+            args.TokenCache.DeserializeMsalV3(File.Exists(_cacheFilePath)
+                ? File.ReadAllBytes(_cacheFilePath)
+                : null);
+
+            return Task.CompletedTask;
+        }
+
+        public Task OnBeforeWriteAsync(TokenCacheNotificationArgs args)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

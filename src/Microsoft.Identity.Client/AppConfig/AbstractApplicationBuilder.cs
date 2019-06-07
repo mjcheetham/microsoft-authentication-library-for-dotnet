@@ -23,6 +23,12 @@ namespace Microsoft.Identity.Client
 
         internal ApplicationConfiguration Config { get; }
 
+        public T WithTokenCache(ITokenCacheEventSink eventSink)
+        {
+            Config.TokenCacheEventSink = eventSink;
+            return (T)this;
+        }
+
         /// <summary>
         /// Uses a specific <see cref="IMsalHttpClientFactory"/> to communicate
         /// with the IdP. This enables advanced scenarios such as setting a proxy,

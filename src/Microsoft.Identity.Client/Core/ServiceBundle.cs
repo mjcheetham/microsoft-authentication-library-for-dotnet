@@ -31,6 +31,7 @@ namespace Microsoft.Identity.Client.Core
 
             PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
             HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
+            TokenCacheEventSink = config.TokenCacheEventSink;
 
             if (config.TelemetryConfig != null)
             {
@@ -47,6 +48,8 @@ namespace Microsoft.Identity.Client.Core
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
         }
+
+        public ITokenCacheEventSink TokenCacheEventSink { get; }
 
         public ICoreLogger DefaultLogger { get; }
 

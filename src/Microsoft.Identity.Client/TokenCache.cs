@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client
         private readonly ITokenCacheBlobStorage _defaultTokenCacheBlobStorage;
         private readonly IFeatureFlags _featureFlags;
         private readonly ITokenCacheAccessor _accessor;
+        private readonly ITokenCacheEventSink _eventSink;
         private volatile bool _hasStateChanged;
 
         private ICoreLogger Logger => ServiceBundle.DefaultLogger;
@@ -63,6 +64,7 @@ namespace Microsoft.Identity.Client
         {
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
             _accessor = proxy.CreateTokenCacheAccessor();
+            _eventSink = serviceBundle?.TokenCacheEventSink;
             _featureFlags = proxy.GetFeatureFlags();
             _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
 

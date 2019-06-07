@@ -32,10 +32,14 @@ namespace Microsoft.Identity.Client
         internal async Task OnAfterAccessAsync(TokenCacheNotificationArgs args)
         {
             AfterAccess?.Invoke(args);
-
             if (AsyncAfterAccess != null)
             {
                 await AsyncAfterAccess.Invoke(args).ConfigureAwait(false);
+            }
+
+            if (_eventSink != null)
+            {
+                await _eventSink.OnAfterAccessAsync(args).ConfigureAwait(false);
             }
         }
 
@@ -47,6 +51,11 @@ namespace Microsoft.Identity.Client
                 await AsyncBeforeAccess
                     .Invoke(args)
                     .ConfigureAwait(false);
+            }
+
+            if (_eventSink != null)
+            {
+                await _eventSink.OnBeforeAccessAsync(args).ConfigureAwait(false);
             }
         }
 
@@ -61,6 +70,11 @@ namespace Microsoft.Identity.Client
             if (AsyncBeforeWrite != null)
             {
                 await AsyncBeforeWrite.Invoke(args).ConfigureAwait(false);
+            }
+
+            if (_eventSink != null)
+            {
+                await _eventSink.OnBeforeWriteAsync(args).ConfigureAwait(false);
             }
         }
 
@@ -108,7 +122,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="beforeAccess"></param>
         public void SetBeforeAccessAsync(Func<TokenCacheNotificationArgs, Task> beforeAccess)
@@ -118,7 +132,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="afterAccess"></param>
         public void SetAfterAccessAsync(Func<TokenCacheNotificationArgs, Task> afterAccess)
@@ -128,7 +142,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="beforeWrite"></param>
         public void SetBeforeWriteAsync(Func<TokenCacheNotificationArgs, Task> beforeWrite)
@@ -147,5 +161,12 @@ namespace Microsoft.Identity.Client
             "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
 #endif
         }
+    }
+
+    public interface ITokenCacheEventSink
+    {
+        Task OnAfterAccessAsync(TokenCacheNotificationArgs args);
+        Task OnBeforeAccessAsync(TokenCacheNotificationArgs args);
+        Task OnBeforeWriteAsync(TokenCacheNotificationArgs args);
     }
 }

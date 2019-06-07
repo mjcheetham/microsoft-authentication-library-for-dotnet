@@ -50,6 +50,7 @@ namespace Microsoft.Identity.Client
         public bool EnablePiiLogging { get; internal set; }
         public LogLevel LogLevel { get; internal set; } = LogLevel.Info;
         public bool IsDefaultPlatformLoggingEnabled { get; internal set; }
+        public ITokenCacheEventSink TokenCacheEventSink { get; internal set; }
         public IMsalHttpClientFactory HttpClientFactory { get; internal set; }
         public bool IsExtendedTokenLifetimeEnabled { get; set; }
         public TelemetryCallback TelemetryCallback { get; internal set; }
